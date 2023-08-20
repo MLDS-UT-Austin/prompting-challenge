@@ -1,11 +1,14 @@
 <script>
 	import { enhance, applyAction } from '$app/forms';
   import { fade } from 'svelte/transition';
-  import { goto, invalidateAll } from '$app/navigation';
 
   export let data;
 
-  let { visited, puzzle } = data;
+  let { visited, puzzle } = { visited: false, puzzle: {} };
+  $: {  // make visited and puzzle variables reactive
+    visited = data.visited;
+    puzzle = data.puzzle;
+  }
   let wizardMessage = '';
 </script>
 
@@ -53,12 +56,14 @@
       return async ({ result, update }) => {
         await update();
 
-        if (result?.type !== 'success') {
+        if (result?.type === 'failure') {
           wizardMessage = 'That is incorrect.';
+          return;
+        } else if (result.type !== 'redirect') {
           return;
         }
 
-        applyAction(result);
+        await applyAction(result);
       }
     }}
   >

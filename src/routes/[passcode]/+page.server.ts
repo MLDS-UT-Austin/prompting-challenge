@@ -8,7 +8,7 @@ export function load({ params }: { params: { passcode: string } }) {
     const puzzle: Puzzle | undefined = puzzleMappings[params.passcode];
 
     if (!puzzle) {
-        return error(404);
+        throw error(404);
     }
 
     return {
