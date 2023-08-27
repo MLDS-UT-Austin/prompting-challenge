@@ -51,11 +51,12 @@ export const actions = {
     const passcode = url.pathname.split('/')[1];
     const message = data.get('message');
     const content = message as string;
+    const puzzle = puzzleMappings[passcode];
 
     const chatCompletion = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: [
-        ...puzzleMappings[passcode].prompt,
+        ...puzzle.prompt,
         {
           role: "user",
           content
@@ -63,8 +64,16 @@ export const actions = {
       ],
     });
 
+    const output = chatCompletion.data.choices[0].message?.content ?? '';
+
+    if (puzzle.filterOutput && output.toLowerCase().includes(puzzle.passcode)) {
+      return {
+        message: 'Good attempt, but I know to prevent myself from revealing the passcode.',
+      }
+    }
+
     return {
-      message: chatCompletion.data.choices[0].message?.content ?? '',
+      message: output,
     }
   },
   guess: async ({ request }: { request: Request }) => {
