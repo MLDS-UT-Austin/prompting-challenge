@@ -1,20 +1,48 @@
 import { error } from "@sveltejs/kit";
 import { fail, redirect } from '@sveltejs/kit';
-import { puzzleMappings } from "../puzzles";
+import { puzzleMappings, puzzleIndices } from "../puzzles";
 import type { Puzzle } from "../puzzles";
 import openai from "../openai";
 
-export function load({ params }: { params: { passcode: string } }) {
-    const puzzle: Puzzle | undefined = puzzleMappings[params.passcode];
 
-    if (!puzzle) {
-        throw error(404);
-    }
+const LEADERBOARD_PASSCODE = 'leaderboard';
 
+let database: { [name: string]: { level: number, time: number } } = {};
+
+
+export function load({ cookies, params }: { cookies: any, params: { passcode: string } }) {
+  const puzzle: Puzzle | undefined = puzzleMappings[params.passcode];
+  const name = cookies.get('name');
+
+  if (!puzzle) {
+    throw error(404);
+  }
+
+  if (params.passcode === LEADERBOARD_PASSCODE) {
     return {
-        puzzle,
-        visited: true,
+      puzzle,
+      location: params.passcode,
+      visited: true,
+      leaderboard: database,
     };
+  }
+
+  const puzzleIndex = puzzleIndices[params.passcode];
+
+  const currentValue = database[name];
+  if (currentValue === undefined || puzzleIndex > currentValue.level) {
+    const time = Date.now();
+    database[name] = {
+      level: puzzleIndex,
+      time,
+    }
+  }
+
+  return {
+      puzzle,
+      location: params.passcode,
+      visited: true,
+  };
 }
 
 export const actions = {

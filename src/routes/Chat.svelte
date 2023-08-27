@@ -5,15 +5,14 @@
   export let data;
 
   let { visited, puzzle } = { visited: false, puzzle: {} };
-  $: {  // make visited and puzzle variables reactive
-    visited = data.visited;
+  $: {  // make puzzle variable reactive
     puzzle = data.puzzle;
   }
   let wizardMessage = '';
 </script>
 
 
-<div in:fade={{ duration: visited ? 0 : 2000, delay: visited ? 0 : 9000 }} class="space-y-8">
+<div in:fade={{ duration: visited ? 0 : 2000, delay: visited ? 0 : 1000 }} class="space-y-8">
   <h1 class="text-9xl">
     🧙
   </h1>

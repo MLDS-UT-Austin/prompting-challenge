@@ -4,12 +4,14 @@ import openai from "./openai";
 
 export function load({ cookies }) {
   const visited = cookies.get('visited') === 'true';
+  const name = cookies.get('name') ?? '';
 
   cookies.set('visited', 'true', { path: '/' });
 
   return {
     puzzle: puzzles[0],
     visited,
+    name,
   };
 };
 
@@ -44,5 +46,15 @@ export const actions = {
     } else {
       return fail(404);
     }
+  },
+  name: async ({ cookies, request }: { cookies: any, request: Request }) => {
+    const data = await request.formData();
+    const name: string = data.get('name') as string ?? '';
+
+    cookies.set('name', name, { path: '/' });
+
+    return {
+      name,
+    };
   }
 };
